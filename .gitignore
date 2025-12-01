@@ -1,0 +1,27 @@
+# Build
+build/
+out/
+*.o
+*.obj
+*.pdb
+*.exe
+*.a
+*.so
+*.dll
+*.lib
+
+# CMake
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.user
+*.code-workspace
