@@ -1,5 +1,5 @@
 add_library(core
-    task_manager.hpp
+    task_manager.cpp
 )
 
 target_include_directories(core
