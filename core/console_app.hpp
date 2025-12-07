@@ -1,4 +1,5 @@
 #pragma once
+
 #include <iostream>
 #include <string>
 #include <limits>
@@ -81,7 +82,7 @@ private:
         for (const auto& task : tasks) {
             std::cout << task.getId() << "\t"
                       << task.getTitle() << "\t\t"
-                      << task.getDescription() << "\t\t"
+                      << (task.getDescription()).substr(0, 10) << "\t\t"
                       << (task.isCompleted() ? "выполнена\n" : "не выполнена\n") << "\n";
         }
     }
@@ -101,17 +102,75 @@ private:
     }
 
     void editTask() {
-        // TODO: Реализовать редактирование задачи
-        std::cout << "Функция редактирования задачи (изменено)\n";
+        std::cout << "Введите id задачи для редактирования: ";
+        int id;
+        if (!(std::cin >> id)) {
+            clearInput();
+            std::cout << "Некорректный ввод id\n";
+            return;
+        }
+
+        clearInput();
+        Task* task = manager_.findTaskById(id);
+        if (task == nullptr) {
+            std::cout << "Задача с таким id не найдена\n";
+            return;
+        }
+
+        std::cout << "Текущий заголовок: " << task->getTitle() << "\n";
+        std::cout << "Введите новый заголовок (оставьте пустым, чтобы не менять): ";
+        std::string newTitle;
+        std::getline(std::cin, newTitle);
+        if (!newTitle.empty()) {
+            task->setTitle(newTitle);
+        }
+
+        std::cout << "Текущее описание: " << task->getDescription() << "\n";
+        std::cout << "Введите новое описание (оставьте пустым, чтобы не менять): ";
+        std::string newDescription;
+        std::getline(std::cin, newDescription);
+        if (!newDescription.empty()) {
+            task->setDescription(newDescription);
+        }
+
+        std::cout << "Задача обновлена\n";
     }
 
     void toggleTaskStatus() {
-        // TODO: Реализовать изменение статуса задачи
-        std::cout << "Функция изменения статуса задачи (переключено)\n";
+        std::cout << "Введите id задачи для изменения статуса: ";
+        int id;
+        if (!(std::cin >> id)) {
+            clearInput();
+            std::cout << "Некорректный ввод id\n";
+            return;
+        }
+
+        clearInput();
+        Task* task = manager_.findTaskById(id);
+        if (task == nullptr) {
+            std::cout << "Задача с таким id не найдена\n";
+            return;
+        }
+
+        bool newStatus = !task->isCompleted();
+        task->setCompleted(newStatus);
+        std::cout << "Новый статус: " << (newStatus ? "выполнена\n" : "не выполнена\n");
     }
 
     void deleteTask() {
-        // TODO: Реализовать удаление задачи
-        std::cout << "Функция удаления задачи (удалено)\n";
+        std::cout << "Введите id задачи для удаления: ";
+        int id;
+        if (!(std::cin >> id)) {
+            clearInput();
+            std::cout << "Некорректный ввод id\n";
+            return;
+        }
+
+        clearInput();
+        if (manager_.deleteTask(id)) {
+            std::cout << "Задача удалена\n";
+        } else {
+            std::cout << "Задача с таким id не найдена\n";
+        }
     }
 };
