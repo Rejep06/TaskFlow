@@ -51,3 +51,4 @@ private:
     int nextTaskId_;
     std::vector<Task> tasks_;
 };
+
