@@ -2,49 +2,29 @@
 #include <string>
 
 class Task {
-public:
+   public:
     Task(int id,
          const std::string& title,
          const std::string& description,
-         bool completed = false)
-        : id_(id)
-        , title_(title)
-        , description_(description)
-        , completed_(completed) {
-    }
+         bool completed = false);
 
-    int getId() const {
-        return id_;
-    }
+    int getId() const;
 
-    const std::string& getTitle() const {
-        return title_;
-    }
+    const std::string& getTitle() const;
 
-    void setTitle(const std::string& title) {
-        title_ = title;
-    }
+    void setTitle(const std::string& title);
 
-    const std::string& getDescription() const {
-        return description_;
-    }
+    const std::string& getDescription() const;
 
-    void setDescription(const std::string& description) {
-        description_ = description;
-    }
+    void setDescription(const std::string& description);
 
-    bool isCompleted() const {
-        return completed_;
-    }
+    bool isCompleted() const;
 
-    void setCompleted(bool completed) {
-        completed_ = completed;
-    }
+    void setCompleted(bool completed);
 
-private:
+   private:
     int id_;
     std::string title_;
     std::string description_;
     bool completed_;
 };
-    
