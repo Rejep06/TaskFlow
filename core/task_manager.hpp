@@ -3,23 +3,33 @@
 #include <algorithm>
 #include <string>
 #include <vector>
+#include <chrono>
 
 #include "ITaskService.hpp"
 #include "task.hpp"
 
 class TaskManager : public ITaskService {
-   public:
+public:
     TaskManager();
+
+    
     Task& createTask(const std::string& title,
                      const std::string& description) override;
 
     const std::vector<Task>& getAllTasks() const override;
-
+    
     Task* findTaskById(int id) override;
-
+    
     bool deleteTask(int id) override;
 
-   private:
+    
+    Task& createTaskWithDeadline(const std::string& title,
+                                 const std::string& description,
+                                 std::chrono::system_clock::time_point deadline);
+
+    std::vector<Task*> getOverdueTasks();
+
+private:
     int nextTaskId_;
     std::vector<Task> tasks_;
 };
