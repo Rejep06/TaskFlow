@@ -1,4 +1,5 @@
 #include "task_manager.hpp"
+#include <chrono>
 
 TaskManager::TaskManager()
     : nextTaskId_(1) {
@@ -6,9 +7,16 @@ TaskManager::TaskManager()
 
 Task& TaskManager::createTask(const std::string& title,
                               const std::string& description) {
-    int id = nextTaskId_;
-    nextTaskId_ += 1;
+    int id = nextTaskId_++;
     tasks_.emplace_back(id, title, description, false);
+    return tasks_.back();
+}
+
+Task& TaskManager::createTaskWithDeadline(const std::string& title,
+                                          const std::string& description,
+                                          std::chrono::system_clock::time_point deadline) {
+    int id = nextTaskId_++;
+    tasks_.emplace_back(id, title, description, deadline, false);
     return tasks_.back();
 }
 
@@ -37,4 +45,14 @@ bool TaskManager::deleteTask(int id) {
     }
     tasks_.erase(it, tasks_.end());
     return true;
+}
+
+std::vector<Task*> TaskManager::getOverdueTasks() {
+    std::vector<Task*> overdue;
+    for (auto& task : tasks_) {
+        if (task.isOverdue()) {
+            overdue.push_back(&task);
+        }
+    }
+    return overdue;
 }
