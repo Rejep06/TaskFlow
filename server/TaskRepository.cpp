@@ -1,11 +1,17 @@
 #include "TaskRepository.hpp"
 
+#include <filesystem>
 #include <fstream>
 #include <iostream>
-#include <filesystem>
 #include <nlohmann/json.hpp>
 
+#include "ParserTime.hpp"
+
 using json = nlohmann::json;
+
+TaskRepository::TaskRepository(std::shared_ptr<ParserTime> p)
+    : parserTime(p) {
+}
 
 std::vector<Task> TaskRepository::load() {
     std::vector<Task> tasks;
@@ -20,7 +26,7 @@ std::vector<Task> TaskRepository::load() {
             item["id"].get<int>(),
             item["title"].get<std::string>(),
             item["description"].get<std::string>(),
-            item["deadline"].get<std::string>(),
+            parserTime->stringToTimePoint(item["deadline"].get<std::string>()),
             item["completed"].get<bool>());
         tasks.push_back(task);
     }
@@ -38,11 +44,13 @@ void TaskRepository::save(const std::vector<Task>& tasks) {
 
     json j;
     for (const auto& task : tasks) {
-        j.push_back({{"id", task.getId()},
-                     {"title", task.getTitle()},
-                     {"description", task.getDescription()},
-                     {"deadline", task.getDeadline()},
-                     {"completed", task.isCompleted()}});
+        json item = {
+            {"id", task.getId()},
+            {"title", task.getTitle()},
+            {"description", task.getDescription()},
+            {"deadline", parserTime->timePointToString(task.getDeadline())},
+            {"completed", task.isCompleted()}};
+        j.push_back(item);
     }
 
     file << j.dump(4);
