@@ -1,4 +1,5 @@
 #include "task_manager.hpp"
+
 #include <chrono>
 
 TaskManager::TaskManager()
@@ -6,17 +7,14 @@ TaskManager::TaskManager()
 }
 
 Task& TaskManager::createTask(const std::string& title,
-                              const std::string& description) {
+                              const std::string& description,
+                              std::optional<std::chrono::system_clock::time_point> deadline) {
     int id = nextTaskId_++;
-    tasks_.emplace_back(id, title, description, false);
-    return tasks_.back();
-}
-
-Task& TaskManager::createTaskWithDeadline(const std::string& title,
-                                          const std::string& description,
-                                          std::chrono::system_clock::time_point deadline) {
-    int id = nextTaskId_++;
-    tasks_.emplace_back(id, title, description, deadline, false);
+    if (deadline.has_value()) {
+        tasks_.emplace_back(id, title, description, deadline.value(), false);
+    } else {
+        tasks_.emplace_back(id, title, description, false);
+    }
     return tasks_.back();
 }
 

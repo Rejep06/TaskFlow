@@ -1,35 +1,31 @@
 #pragma once
 
 #include <algorithm>
+#include <chrono>
+#include <optional>
 #include <string>
 #include <vector>
-#include <chrono>
 
 #include "ITaskService.hpp"
 #include "task.hpp"
 
 class TaskManager : public ITaskService {
-public:
+   public:
     TaskManager();
 
-    
     Task& createTask(const std::string& title,
-                     const std::string& description) override;
+                     const std::string& description,
+                     std::optional<std::chrono::system_clock::time_point> deadline) override;
 
     const std::vector<Task>& getAllTasks() const override;
-    
-    Task* findTaskById(int id) override;
-    
-    bool deleteTask(int id) override;
 
-    
-    Task& createTaskWithDeadline(const std::string& title,
-                                 const std::string& description,
-                                 std::chrono::system_clock::time_point deadline);
+    Task* findTaskById(int id) override;
+
+    bool deleteTask(int id) override;
 
     std::vector<Task*> getOverdueTasks();
 
-private:
+   private:
     int nextTaskId_;
     std::vector<Task> tasks_;
 };

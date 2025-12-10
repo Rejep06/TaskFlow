@@ -1,11 +1,12 @@
 #pragma once
 
-#include <iostream>
-#include <string>
-#include <limits>
 #include <chrono>
-#include <sstream>
 #include <iomanip>
+#include <iostream>
+#include <limits>
+#include <optional>
+#include <sstream>
+#include <string>
 
 #include "task_manager.hpp"
 
@@ -37,7 +38,7 @@ std::string formatDateTime(std::chrono::system_clock::time_point tp) {
 }
 
 class ConsoleApp {
-public:
+   public:
     explicit ConsoleApp(TaskManager& manager)
         : manager_(manager) {
     }
@@ -55,36 +56,36 @@ public:
 
             clearInput();
             switch (choice) {
-            case 1:
-                addTask();
-                break;
-            case 2:
-                listTasks();
-                break;
-            case 3:
-                editTask();
-                break;
-            case 4:
-                toggleTaskStatus();
-                break;
-            case 5:
-                deleteTask();
-                break;
-            case 6:
-                showOverdueTasks();
-                break;
-            case 7:
-                is_running = false;
-                std::cout << "Выход из программы\n";
-                break;
-            default:
-                std::cout << "Нет такого пункта меню\n";
-                break;
+                case 1:
+                    addTask();
+                    break;
+                case 2:
+                    listTasks();
+                    break;
+                case 3:
+                    editTask();
+                    break;
+                case 4:
+                    toggleTaskStatus();
+                    break;
+                case 5:
+                    deleteTask();
+                    break;
+                case 6:
+                    showOverdueTasks();
+                    break;
+                case 7:
+                    is_running = false;
+                    std::cout << "Выход из программы\n";
+                    break;
+                default:
+                    std::cout << "Нет такого пункта меню\n";
+                    break;
             }
         }
     }
 
-private:
+   private:
     TaskManager& manager_;
 
     void clearInput() {
@@ -139,17 +140,17 @@ private:
         std::getline(std::cin, deadlineStr);
 
         if (deadlineStr.empty()) {
-            Task& task = manager_.createTask(title, description);
+            Task& task = manager_.createTask(title, description, std::optional<std::chrono::system_clock::time_point>{});
             std::cout << "Задача создана, id: " << task.getId() << "\n";
         } else {
             try {
                 auto deadline = parseDateTime(deadlineStr);
-                Task& task = manager_.createTaskWithDeadline(title, description, deadline);
+                Task& task = manager_.createTask(title, description, deadline);
                 std::cout << "Задача с дедлайном создана, id: " << task.getId() << "\n";
             } catch (const std::exception& e) {
                 std::cout << "Ошибка: " << e.what() << "\n";
                 std::cout << "Задача создана без дедлайна.\n";
-                Task& task = manager_.createTask(title, description);
+                Task& task = manager_.createTask(title, description, std::optional<std::chrono::system_clock::time_point>{});
                 std::cout << "Id: " << task.getId() << "\n";
             }
         }
