@@ -25,3 +25,12 @@ Thumbs.db
 .idea/
 *.user
 *.code-workspace
+
+# Logs
+logs/
+*.log
+
+# Data
+data/
+*.csv
+*.json
