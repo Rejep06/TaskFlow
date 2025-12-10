@@ -7,6 +7,7 @@ include(FetchContent)
 # Disable non-blocking getaddrinfo on toolchains that don't expose
 # GetAddrInfoExCancel (e.g. some MinGW targets)
 set(HTTPLIB_USE_NON_BLOCKING_GETADDRINFO OFF CACHE BOOL "Disable non-blocking getaddrinfo" FORCE)
+set(HTTPLIB_USE_ZSTD OFF CACHE BOOL "Disable zstd" FORCE)
 
 FetchContent_Declare(
     httplib
@@ -21,7 +22,6 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(json)
 
-set(HTTPLIB_USE_ZSTD OFF CACHE BOOL "Disable zstd" FORCE)
 
 add_executable(server
     main.cpp
