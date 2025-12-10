@@ -25,7 +25,14 @@ add_executable(server
     main.cpp
     TaskController.cpp
     TaskRepository.cpp
+    ./utils/ParserTime.cpp
 )
+
+target_include_directories(server PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/utils
+)
+
 
 target_link_libraries(server PRIVATE
     core
