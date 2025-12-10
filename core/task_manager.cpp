@@ -1,22 +1,15 @@
 #include "task_manager.hpp"
-#include <chrono>
 
+// Constructors
 TaskManager::TaskManager()
     : nextTaskId_(1) {
 }
 
+// ITaskService interface implementation
 Task& TaskManager::createTask(const std::string& title,
                               const std::string& description) {
     int id = nextTaskId_++;
     tasks_.emplace_back(id, title, description, false);
-    return tasks_.back();
-}
-
-Task& TaskManager::createTaskWithDeadline(const std::string& title,
-                                          const std::string& description,
-                                          std::chrono::system_clock::time_point deadline) {
-    int id = nextTaskId_++;
-    tasks_.emplace_back(id, title, description, deadline, false);
     return tasks_.back();
 }
 
@@ -45,6 +38,15 @@ bool TaskManager::deleteTask(int id) {
     }
     tasks_.erase(it, tasks_.end());
     return true;
+}
+
+// Functions
+Task& TaskManager::createTaskWithDeadline(const std::string& title,
+                                          const std::string& description,
+                                          std::chrono::system_clock::time_point deadline) {
+    int id = nextTaskId_++;
+    tasks_.emplace_back(id, title, description, deadline, false);
+    return tasks_.back();
 }
 
 std::vector<Task*> TaskManager::getOverdueTasks() {
