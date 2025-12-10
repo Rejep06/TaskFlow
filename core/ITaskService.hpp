@@ -19,4 +19,6 @@ class ITaskService {
         // Временная реализация, можно переопределить в наследниках
         return;
     }
+
+    virtual std::vector<Task*> getOverdueTasks() = 0;
 };

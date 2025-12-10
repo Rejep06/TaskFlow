@@ -23,7 +23,9 @@ class TaskManager : public ITaskService {
 
     bool deleteTask(int id) override;
 
-    std::vector<Task*> getOverdueTasks();
+    std::vector<Task*> getOverdueTasks() override;
+
+    void addTask(const Task& task) override;
 
    private:
     int nextTaskId_;

@@ -20,6 +20,13 @@ Task& TaskManager::createTask(const std::string& title,
     return tasks_.back();
 }
 
+void TaskManager::addTask(const Task& task) {
+    tasks_.push_back(task);
+    if (task.getId() >= nextTaskId_) {
+        nextTaskId_ = task.getId() + 1;
+    }
+}
+
 const std::vector<Task>& TaskManager::getAllTasks() const {
     return tasks_;
 }
