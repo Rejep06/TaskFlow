@@ -21,6 +21,8 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(json)
 
+set(HTTPLIB_USE_ZSTD OFF CACHE BOOL "Disable zstd" FORCE)
+
 add_executable(server
     main.cpp
     TaskController.cpp
