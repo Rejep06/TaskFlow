@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
-
-#include "../core/task_manager.hpp"
+#include "../core/task_manager.cpp"
 
 TEST(TaskManager, AddTask) {
-    assert(true);
+    int id = addTask("Test task");
+    ASSERT_EQ(id, 1);
 }
