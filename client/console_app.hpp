@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <thread>
 
 class ConsoleApp {
    public:
@@ -9,6 +10,8 @@ class ConsoleApp {
 
    private:
     std::string baseUrl_;
+
+    void notificationLoop();
 
     void printMenu();
     void clearInput();

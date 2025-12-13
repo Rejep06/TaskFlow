@@ -27,6 +27,8 @@ class TaskManager : public ITaskService {
 
     void addTask(const Task& task) override;
 
+    std::vector<Task>& getAllTasks() override;
+
    private:
     int nextTaskId_;
     std::vector<Task> tasks_;

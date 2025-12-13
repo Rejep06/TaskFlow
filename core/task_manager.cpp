@@ -27,6 +27,10 @@ void TaskManager::addTask(const Task& task) {
     }
 }
 
+std::vector<Task>& TaskManager::getAllTasks() {
+    return tasks_;
+}
+
 const std::vector<Task>& TaskManager::getAllTasks() const {
     return tasks_;
 }

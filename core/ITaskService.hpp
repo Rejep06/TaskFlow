@@ -20,5 +20,7 @@ class ITaskService {
         return;
     }
 
+    virtual std::vector<Task>& getAllTasks() = 0;
+
     virtual std::vector<Task*> getOverdueTasks() = 0;
 };
