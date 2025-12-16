@@ -78,3 +78,32 @@ TEST(TaskManagerTest, OverdueTasks) {
     overdue = manager.getOverdueTasks();
     EXPECT_TRUE(overdue.empty());
 }
+
+TEST(TaskManagerTest, OverdueTasksAreNotificationCandidates) {
+    TaskManager manager;
+    
+    // Задаем время для просроченной и будущей задачи
+    auto past = std::chrono::system_clock::now() - std::chrono::hours(3);
+    auto future = std::chrono::system_clock::now() + std::chrono::hours(3);
+
+    // Создаем задачи
+    Task& overdue = manager.createTask("Overdue", "desc", past);
+    Task& upcoming = manager.createTask("Upcoming", "desc", future);
+    Task& noDeadline = manager.createTask("No deadline", "desc", std::nullopt);
+
+    auto candidates = manager.getOverdueTasks();
+
+    // Проверяем, что в списке только одна просроченная задача
+    ASSERT_EQ(candidates.size(), 1);
+    EXPECT_EQ(candidates[0]->getId(), overdue.getId());
+
+    // Проверяем, что завершенные просроченные задачи не попадают в уведомления
+    overdue.setCompleted(true);
+    candidates = manager.getOverdueTasks();
+    
+    // Проверяем, что список кандидатов пуст, так как задача завершена
+    EXPECT_TRUE(candidates.empty());
+
+    (void)upcoming;
+    (void)noDeadline;
+}
