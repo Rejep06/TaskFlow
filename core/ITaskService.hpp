@@ -9,6 +9,11 @@
 class ITaskService {
    public:
     virtual ~ITaskService() = default;
+    ITaskService() = default;
+    ITaskService(const ITaskService&) = delete;
+    ITaskService& operator=(const ITaskService&) = delete;
+    ITaskService(ITaskService&&) = delete;
+    ITaskService& operator=(ITaskService&&) = delete;
 
     virtual const std::vector<Task>& getAllTasks() const = 0;
     virtual Task& createTask(const std::string&, const std::string&,
