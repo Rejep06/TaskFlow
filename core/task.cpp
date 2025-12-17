@@ -2,10 +2,12 @@
 
 // Constructors
 Task::Task(int id,
+           const std::string& username,
            const std::string& title,
            const std::string& description,
            bool completed)
     : id_(id)
+    , username_(username)
     , title_(title)
     , description_(description)
     , completed_(completed)
@@ -13,11 +15,13 @@ Task::Task(int id,
 }
 
 Task::Task(int id,
+           const std::string& username,
            const std::string& title,
            const std::string& description,
            std::chrono::system_clock::time_point deadline,
            bool completed)
     : id_(id)
+    , username_(username)
     , title_(title)
     , description_(description)
     , completed_(completed)
@@ -27,6 +31,10 @@ Task::Task(int id,
 // Getters
 int Task::getId() const {
     return id_;
+}
+
+const std::string& Task::getUsername() const {
+    return username_;
 }
 
 const std::string& Task::getTitle() const {

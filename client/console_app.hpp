@@ -9,9 +9,11 @@ class ConsoleApp {
 
    private:
     std::string baseUrl_;
+    std::string currentUsername_;
 
     void printMenu();
     void clearInput();
+    bool login();
 
     void addTask();
     void listTasks();

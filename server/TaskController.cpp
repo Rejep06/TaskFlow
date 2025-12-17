@@ -11,10 +11,50 @@ TaskController::TaskController(std::shared_ptr<ITaskService> m,
     : manager(m), repo(r), parserTime(p) {}
 
 void TaskController::registerRoutes(httplib::Server& server) {
-    server.Get("/tasks", [&](const httplib::Request&, httplib::Response& res) {
-        auto tasks = manager->getAllTasks();
-        json j;
-
+    // Логин
+    server.Post("/login", [&](const httplib::Request& req, httplib::Response& res) {
+        json body;
+        try {
+            body = json::parse(req.body);
+        } catch (...) {
+            res.status = 400;
+            res.set_content("{\"error\":\"invalid json\"}", "application/json");
+            return;
+        }
+        
+        if (!body.contains("username") || body["username"].get<std::string>().empty()) {
+            res.status = 400;
+            res.set_content("{\"error\":\"Username required\"}", "application/json");
+            return;
+        }
+        
+        std::string username = body["username"].get<std::string>();
+        std::cout << "👤 Пользователь " << username << " вошёл в систему\n";
+        
+        res.set_content("{\"status\":\"ok\", \"message\":\"Welcome " + username + "\"}", "application/json");
+    });
+    
+    // Получить задачи пользователя
+    server.Post("/tasks/list", [&](const httplib::Request& req, httplib::Response& res) {
+        json body;
+        try {
+            body = json::parse(req.body);
+        } catch (...) {
+            res.status = 400;
+            res.set_content("{\"error\":\"invalid json\"}", "application/json");
+            return;
+        }
+        
+        if (!body.contains("username") || body["username"].get<std::string>().empty()) {
+            res.status = 400;
+            res.set_content("{\"error\":\"Username required\"}", "application/json");
+            return;
+        }
+        
+        std::string username = body["username"].get<std::string>();
+        auto tasks = manager->getAllTasks(username);
+        
+        json j = json::array();
         for (const auto& t : tasks) {
             json item = {
                 {"id", t.getId()},
@@ -24,33 +64,13 @@ void TaskController::registerRoutes(httplib::Server& server) {
                 {"completed", t.isCompleted()}};
             j.push_back(item);
         }
-
+        
         res.set_content(j.dump(), "application/json");
     });
-
-    server.Get(R"(/tasks/(\d+))", [&](const httplib::Request& req, httplib::Response& res) {
-        int id = std::stoi(req.matches[1]);
-        Task* task = manager->findTaskById(id);
-
-        if (!task) {
-            res.status = 404;
-            res.set_content("{\"error\":\"Task not found\"}", "application/json");
-            return;
-        }
-
-        json j = {
-            {"id", task->getId()},
-            {"title", task->getTitle()},
-            {"description", task->getDescription()},
-            {"deadline", parserTime->timePointToString(task->getDeadline())},
-            {"completed", task->isCompleted()}};
-
-        res.set_content(j.dump(), "application/json");
-    });
-
+    
+    // Создать задачу
     server.Post("/tasks", [&](const httplib::Request& req, httplib::Response& res) {
         json body;
-
         try {
             body = json::parse(req.body);
         } catch (...) {
@@ -58,42 +78,49 @@ void TaskController::registerRoutes(httplib::Server& server) {
             res.set_content("{\"error\":\"invalid json\"}", "application/json");
             return;
         }
-
+        
+        if (!body.contains("username") || body["username"].get<std::string>().empty()) {
+            res.status = 400;
+            res.set_content("{\"error\":\"Username required\"}", "application/json");
+            return;
+        }
+        
         if (!body.contains("title") || !body.contains("description")) {
             res.status = 400;
             res.set_content("{\"error\":\"Missing fields\"}", "application/json");
             return;
         }
-
+        
+        std::string username = body["username"].get<std::string>();
         std::optional<std::chrono::system_clock::time_point> deadline;
-
+        
         if (body.contains("deadline") && !body["deadline"].is_null()) {
             std::string d = body["deadline"].get<std::string>();
             if (!d.empty()) {
                 deadline = parserTime->stringToTimePoint(d);
             }
         }
-
+        
         Task& task = manager->createTask(
+            username,
             body["title"].get<std::string>(),
             body["description"].get<std::string>(),
             deadline);
-
-        repo->save(manager->getAllTasks());
-
-        res.set_content("{\"status\":\"ok\"}", "application/json");
+        
+        // Сохраняем все задачи пользователя
+        auto userTasks = manager->getAllTasks(username);
+        repo->save(username, userTasks);
+        
+        json response = {
+            {"status", "created"},
+            {"id", task.getId()},
+            {"message", "Task created successfully"}};
+        
+        res.set_content(response.dump(), "application/json");
     });
-
-    server.Put(R"(/tasks/(\d+))", [&](const httplib::Request& req, httplib::Response& res) {
-        int id = std::stoi(req.matches[1]);
-        Task* task = manager->findTaskById(id);
-
-        if (!task) {
-            res.status = 404;
-            res.set_content("{\"error\":\"Task not found\"}", "application/json");
-            return;
-        }
-
+    
+    // Обновить задачу
+    server.Put("/tasks", [&](const httplib::Request& req, httplib::Response& res) {
         json body;
         try {
             body = json::parse(req.body);
@@ -102,15 +129,37 @@ void TaskController::registerRoutes(httplib::Server& server) {
             res.set_content("{\"error\":\"invalid json\"}", "application/json");
             return;
         }
-
+        
+        if (!body.contains("username") || body["username"].get<std::string>().empty()) {
+            res.status = 400;
+            res.set_content("{\"error\":\"Username required\"}", "application/json");
+            return;
+        }
+        
+        if (!body.contains("id")) {
+            res.status = 400;
+            res.set_content("{\"error\":\"Task ID required\"}", "application/json");
+            return;
+        }
+        
+        std::string username = body["username"].get<std::string>();
+        int id = body["id"].get<int>();
+        
+        Task* task = manager->findTaskById(username, id);
+        if (!task) {
+            res.status = 404;
+            res.set_content("{\"error\":\"Task not found\"}", "application/json");
+            return;
+        }
+        
         if (body.contains("title")) {
             task->setTitle(body["title"].get<std::string>());
         }
-
+        
         if (body.contains("description")) {
             task->setDescription(body["description"].get<std::string>());
         }
-
+        
         if (body.contains("deadline")) {
             if (body["deadline"].is_null()) {
                 task->setDeadline(std::chrono::system_clock::time_point::max());
@@ -119,48 +168,122 @@ void TaskController::registerRoutes(httplib::Server& server) {
                     parserTime->stringToTimePoint(body["deadline"].get<std::string>()));
             }
         }
-
-        repo->save(manager->getAllTasks());
+        
+        // Сохраняем все задачи пользователя
+        auto userTasks = manager->getAllTasks(username);
+        repo->save(username, userTasks);
+        
         res.set_content("{\"status\":\"updated\"}", "application/json");
     });
-
-    server.Delete(R"(/tasks/(\d+))", [&](const httplib::Request& req, httplib::Response& res) {
-        int id = std::stoi(req.matches[1]);
-        if (manager->deleteTask(id)) {
-            repo->save(manager->getAllTasks());
+    
+    // Удалить задачу
+    server.Delete("/tasks", [&](const httplib::Request& req, httplib::Response& res) {
+        json body;
+        try {
+            body = json::parse(req.body);
+        } catch (...) {
+            res.status = 400;
+            res.set_content("{\"error\":\"invalid json\"}", "application/json");
+            return;
+        }
+        
+        if (!body.contains("username") || body["username"].get<std::string>().empty()) {
+            res.status = 400;
+            res.set_content("{\"error\":\"Username required\"}", "application/json");
+            return;
+        }
+        
+        if (!body.contains("id")) {
+            res.status = 400;
+            res.set_content("{\"error\":\"Task ID required\"}", "application/json");
+            return;
+        }
+        
+        std::string username = body["username"].get<std::string>();
+        int id = body["id"].get<int>();
+        
+        if (manager->deleteTask(username, id)) {
+            auto userTasks = manager->getAllTasks(username);
+            repo->save(username, userTasks);
             res.set_content("{\"status\":\"deleted\"}", "application/json");
         } else {
             res.status = 404;
             res.set_content("{\"error\":\"Task not found\"}", "application/json");
         }
     });
-
-    server.Put(R"(/tasks/(\d+)/toggle)", [&](const httplib::Request& req, httplib::Response& res) {
-        int id = std::stoi(req.matches[1]);
-        Task* task = manager->findTaskById(id);
+    
+    // Переключить статус задачи
+    server.Put("/tasks/toggle", [&](const httplib::Request& req, httplib::Response& res) {
+        json body;
+        try {
+            body = json::parse(req.body);
+        } catch (...) {
+            res.status = 400;
+            res.set_content("{\"error\":\"invalid json\"}", "application/json");
+            return;
+        }
+        
+        if (!body.contains("username") || body["username"].get<std::string>().empty()) {
+            res.status = 400;
+            res.set_content("{\"error\":\"Username required\"}", "application/json");
+            return;
+        }
+        
+        if (!body.contains("id")) {
+            res.status = 400;
+            res.set_content("{\"error\":\"Task ID required\"}", "application/json");
+            return;
+        }
+        
+        std::string username = body["username"].get<std::string>();
+        int id = body["id"].get<int>();
+        
+        Task* task = manager->findTaskById(username, id);
         if (!task) {
             res.status = 404;
             res.set_content("{\"error\":\"Task not found\"}", "application/json");
             return;
         }
+        
         task->setCompleted(!task->isCompleted());
-        repo->save(manager->getAllTasks());
+        
+        auto userTasks = manager->getAllTasks(username);
+        repo->save(username, userTasks);
+        
         res.set_content("{\"status\":\"toggled\"}", "application/json");
     });
-
-    server.Get("/tasks/overdue", [&](const httplib::Request&, httplib::Response& res) {
-        auto overdue = manager->getOverdueTasks();
+    
+    // Просроченные задачи
+    server.Post("/tasks/overdue", [&](const httplib::Request& req, httplib::Response& res) {
+        json body;
+        try {
+            body = json::parse(req.body);
+        } catch (...) {
+            res.status = 400;
+            res.set_content("{\"error\":\"invalid json\"}", "application/json");
+            return;
+        }
+        
+        if (!body.contains("username") || body["username"].get<std::string>().empty()) {
+            res.status = 400;
+            res.set_content("{\"error\":\"Username required\"}", "application/json");
+            return;
+        }
+        
+        std::string username = body["username"].get<std::string>();
+        auto overdue = manager->getOverdueTasks(username);
         json j = json::array();
-
+        
         for (auto* t : overdue) {
-            json item = {{"id", t->getId()},
-                         {"title", t->getTitle()},
-                         {"description", t->getDescription()},
-                         {"deadline", parserTime->timePointToString(t->getDeadline())},
-                         {"completed", t->isCompleted()}};
+            json item = {
+                {"id", t->getId()},
+                {"title", t->getTitle()},
+                {"description", t->getDescription()},
+                {"deadline", parserTime->timePointToString(t->getDeadline())},
+                {"completed", t->isCompleted()}};
             j.push_back(item);
         }
-
+        
         res.set_content(j.dump(), "application/json");
     });
 }
