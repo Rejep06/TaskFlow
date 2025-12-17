@@ -8,10 +8,13 @@
 class TaskRepository {
    public:
     TaskRepository(std::shared_ptr<ParserTime> p);
-    std::vector<Task> load();
-    void save(const std::vector<Task>& tasks);
+    std::vector<Task> load(const std::string& username);
+    void save(const std::string& username, const std::vector<Task>& tasks);
 
    private:
     std::shared_ptr<ParserTime> parserTime;
-    const std::string filename = "data/tasks.json";
+    
+    std::string getFilename(const std::string& username) const {
+        return "data/" + username + "_tasks.json";
+    }
 };
