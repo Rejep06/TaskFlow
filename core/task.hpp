@@ -3,21 +3,24 @@
 #include <string>
 
 class Task {
-   private:
+private:
     int id_;
+    std::string username_;
     std::string title_;
     std::string description_;
     bool completed_;
     std::chrono::system_clock::time_point deadline_;
 
-   public:
+public:
     // Constructors
     Task(int id,
+         const std::string& username,
          const std::string& title,
          const std::string& description,
          bool completed = false);
 
     Task(int id,
+         const std::string& username,
          const std::string& title,
          const std::string& description,
          std::chrono::system_clock::time_point deadline,
@@ -25,6 +28,7 @@ class Task {
 
     // Getters
     int getId() const;
+    const std::string& getUsername() const;
     const std::string& getTitle() const;
     const std::string& getDescription() const;
     bool isCompleted() const;
