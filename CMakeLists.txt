@@ -4,6 +4,12 @@ project(TaskManager)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+add_subdirectory(core)
+add_subdirectory(server)
+add_subdirectory(client)
+add_subdirectory(tests)
+
+
 enable_testing()
 
 # Директории проекта

@@ -45,21 +45,21 @@ std::chrono::system_clock::time_point Task::getDeadline() const {
     return deadline_;
 }
 
-bool Task::getNotified_day() const {
-    return notified_day_;
-}
+// bool Task::getNotified_day() const {
+//     return notified_day_;
+// }
 
-bool Task::getNotified_hour() const {
-    return notified_hour_;
-}
+// bool Task::getNotified_hour() const {
+//     return notified_hour_;
+// }
 
-bool Task::getNotified_10min() const {
-    return notified_10min_;
-}
+// bool Task::getNotified_10min() const {
+//     return notified_10min_;
+// }
 
-bool Task::getNotified_deadline() const {
-    return notified_deadline_;
-}
+// bool Task::getNotified_deadline() const {
+//     return notified_deadline_;
+// }
 
 // Setters
 void Task::setTitle(const std::string& title) {

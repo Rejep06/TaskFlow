@@ -62,18 +62,19 @@ TEST(TaskManagerTest, DeleteTask) {
 TEST(TaskManagerTest, OverdueTasks) {
     TaskManager manager;
     auto past = std::chrono::system_clock::now() - std::chrono::hours(1);
-    auto future = std::chrono::system_clock::now() + std::chrono::hours(1);
 
     // Создаем просроченную задачу и оставляем невыполненной
-    const Task& t1 = manager.createTask("Overdue task", "desc", past);
+    Task& t1 = manager.createTask("Overdue task", "desc", past);
 
     auto overdue = manager.getOverdueTasks();
     ASSERT_EQ(overdue.size(), 1);
     EXPECT_EQ(overdue[0]->getTitle(), "Overdue task");
 
-    Task* overdueTask = manager.findTaskById(overdueId);
+    Task* overdueTask = overdue[0];   // ✅ ВАЖНО
     ASSERT_NE(overdueTask, nullptr);
+
     overdueTask->setCompleted(true);
+
     overdue = manager.getOverdueTasks();
     EXPECT_TRUE(overdue.empty());
 }
