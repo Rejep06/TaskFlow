@@ -5,7 +5,7 @@
 // Тестируем создание задачи без дедлайна
 TEST(TaskManagerTest, CreateTaskWithoutDeadline) {
     TaskManager manager;
-    Task& task = manager.createTask("Task 1", "Description 1", std::nullopt);
+    const Task& task = manager.createTask("Task 1", "Description 1", std::nullopt);
 
     EXPECT_EQ(task.getId(), 1);
     EXPECT_EQ(task.getTitle(), "Task 1");
@@ -20,7 +20,7 @@ TEST(TaskManagerTest, CreateTaskWithoutDeadline) {
 TEST(TaskManagerTest, CreateTaskWithDeadline) {
     TaskManager manager;
     auto deadline = std::chrono::system_clock::now() + std::chrono::hours(24);
-    Task& task = manager.createTask("Task 2", "Description 2", deadline);
+    const Task& task = manager.createTask("Task 2", "Description 2", deadline);
 
     EXPECT_EQ(task.getId(), 1);
     EXPECT_EQ(task.getTitle(), "Task 2");
@@ -34,8 +34,8 @@ TEST(TaskManagerTest, CreateTaskWithDeadline) {
 // Тестируем поиск задачи по ID
 TEST(TaskManagerTest, FindTaskById) {
     TaskManager manager;
-    Task& task1 = manager.createTask("Task 1", "Desc 1", std::nullopt);
-    Task& task2 = manager.createTask("Task 2", "Desc 2", std::nullopt);
+    const Task& task1 = manager.createTask("Task 1", "Desc 1", std::nullopt);
+    const Task& task2 = manager.createTask("Task 2", "Desc 2", std::nullopt);
 
     Task* foundTask = manager.findTaskById(2);
     ASSERT_NE(foundTask, nullptr);
@@ -48,33 +48,54 @@ TEST(TaskManagerTest, FindTaskById) {
 // Тестируем удаление задачи
 TEST(TaskManagerTest, DeleteTask) {
     TaskManager manager;
-    Task& task = manager.createTask("Task 1", "Desc", std::nullopt);
+    const Task& task = manager.createTask("Task 1", "Desc", std::nullopt);
 
     bool deleted = manager.deleteTask(task.getId());
     EXPECT_TRUE(deleted);
     EXPECT_TRUE(manager.getAllTasks().empty());
 
-    // Попытка удалить несуществующую задачу
     bool deleted2 = manager.deleteTask(100);
     EXPECT_FALSE(deleted2);
 }
 
-// Тестируем получение просроченных задач
+// Тестируем получение просроченных задач: в списке только невыполненные с прошедшим дедлайном
 TEST(TaskManagerTest, OverdueTasks) {
     TaskManager manager;
     auto past = std::chrono::system_clock::now() - std::chrono::hours(1);
-    auto future = std::chrono::system_clock::now() + std::chrono::hours(1);
 
     // Создаем просроченную задачу и оставляем невыполненной
     Task& t1 = manager.createTask("Overdue task", "desc", past);
 
-    // Проверяем, что пока выполнена = false → должна попасть в overdue
     auto overdue = manager.getOverdueTasks();
     ASSERT_EQ(overdue.size(), 1);
     EXPECT_EQ(overdue[0]->getTitle(), "Overdue task");
 
-    // Теперь пометим как выполненную
-    t1.setCompleted(true);
+    Task* overdueTask = overdue[0];   // ✅ ВАЖНО
+    ASSERT_NE(overdueTask, nullptr);
+
+    overdueTask->setCompleted(true);
+
     overdue = manager.getOverdueTasks();
     EXPECT_TRUE(overdue.empty());
+}
+
+// Тестируем кандидатов на уведомления: только просроченные, невыполненные и с реальным дедлайном
+TEST(TaskManagerTest, OverdueTasksAreNotificationCandidates) {
+    TaskManager manager;
+    auto past = std::chrono::system_clock::now() - std::chrono::hours(3);
+    auto future = std::chrono::system_clock::now() + std::chrono::hours(3);
+
+    int overdueId = manager.createTask("Overdue", "desc", past).getId();
+    manager.createTask("Upcoming", "desc", future);
+    manager.createTask("No deadline", "desc", std::nullopt);
+
+    auto candidates = manager.getOverdueTasks();
+    ASSERT_EQ(candidates.size(), 1);
+    EXPECT_EQ(candidates[0]->getId(), overdueId);
+
+    Task* overdueTask = manager.findTaskById(overdueId);
+    ASSERT_NE(overdueTask, nullptr);
+    overdueTask->setCompleted(true);
+    candidates = manager.getOverdueTasks();
+    EXPECT_TRUE(candidates.empty());
 }

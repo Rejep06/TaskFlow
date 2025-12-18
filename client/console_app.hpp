@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <thread>
 
 class ConsoleApp {
    public:
@@ -10,8 +11,10 @@ class ConsoleApp {
    private:
     std::string baseUrl_;
 
-    void printMenu();
-    void clearInput();
+    void notificationLoop();
+
+    static void printMenu();
+    static void clearInput();
 
     void addTask();
     void listTasks();

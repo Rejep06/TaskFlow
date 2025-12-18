@@ -26,11 +26,28 @@ void ConsoleApp::printMenu() {
     std::cout << "7. Выход\n";
     std::cout << "Выберите пункт: ";
 }
+std::atomic<bool> running_notification{true};
+void ConsoleApp::notificationLoop() {
+    httplib::Client cli(baseUrl_);
+    while (running_notification) {
+        auto res = cli.Get("/notifications");
+        if (res && res->status == 200) {
+            auto arr = json::parse(res->body);
+            for (const auto& n : arr) {
+                std::cout << "\n🔔 УВЕДОМЛЕНИЕ\n";
+                std::cout << "Задача: " << n["title"] << "\n";
+                std::cout << n["message"] << "\n";
+                std::cout << "------------------\n";
+            }
+        }
+        std::this_thread::sleep_for(std::chrono::minutes(1));
+    }
+}
 
 void ConsoleApp::run() {
-    bool running = true;
+    auto notifier_ = std::thread(&ConsoleApp::notificationLoop, this);
     httplib::Client client(baseUrl_);
-
+    bool running = true;
     while (running) {
         printMenu();
 
@@ -66,6 +83,10 @@ void ConsoleApp::run() {
             default:
                 std::cout << "Нет такого пункта\n";
         }
+    }
+    running_notification = false;
+    if (notifier_.joinable()) {
+        notifier_.join();
     }
 }
 
@@ -222,7 +243,7 @@ void ConsoleApp::showOverdueTasks() {
     json tasks = json::parse(res->body);
 
     std::cout << "\n=== Просроченные задачи ===\n";
-    for (auto& t : tasks) {
+    for (const auto& t : tasks) {
         std::cout << "ID: " << t["id"] << " | "
                   << t["title"] << " | "
                   << t["deadline"] << "\n";

@@ -27,16 +27,20 @@ void TaskManager::addTask(const Task& task) {
     }
 }
 
+std::vector<Task>& TaskManager::getAllTasks() {
+    return tasks_;
+}
+
 const std::vector<Task>& TaskManager::getAllTasks() const {
     return tasks_;
 }
 
 Task* TaskManager::findTaskById(int id) {
-    for (auto& task : tasks_) {
-        if (task.getId() == id) {
-            return &task;
-        }
-    }
+    auto it = std::find_if(tasks_.begin(), tasks_.end(),
+                           [id](const Task& t) { return t.getId() == id; });
+
+    if (it != tasks_.end())
+        return &(*it);
     return nullptr;
 }
 
