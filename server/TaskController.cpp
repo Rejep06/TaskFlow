@@ -30,7 +30,7 @@ void TaskController::registerRoutes(httplib::Server& server) {
 
     server.Get(R"(/tasks/(\d+))", [&](const httplib::Request& req, httplib::Response& res) {
         int id = std::stoi(req.matches[1]);
-        Task* task = manager->findTaskById(id);
+        const Task* task = manager->findTaskById(id);
 
         if (!task) {
             res.status = 404;
@@ -74,7 +74,7 @@ void TaskController::registerRoutes(httplib::Server& server) {
             }
         }
 
-        Task& task = manager->createTask(
+        const Task& task = manager->createTask(
             body["title"].get<std::string>(),
             body["description"].get<std::string>(),
             deadline);
@@ -152,7 +152,7 @@ void TaskController::registerRoutes(httplib::Server& server) {
         auto overdue = manager->getOverdueTasks();
         json j = json::array();
 
-        for (auto* t : overdue) {
+        for (const auto* t : overdue) {
             json item = {{"id", t->getId()},
                          {"title", t->getTitle()},
                          {"description", t->getDescription()},

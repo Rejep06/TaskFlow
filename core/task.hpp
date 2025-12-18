@@ -41,20 +41,20 @@ class Task {
     const std::string& getDescription() const;
     bool isCompleted() const;
     std::chrono::system_clock::time_point getDeadline() const;
-    bool getNotified_day() const;
-    bool getNotified_hour() const;
-    bool getNotified_10min() const;
-    bool getNotified_deadline() const;
+//     bool getNotified_day() const;
+//     bool getNotified_hour() const;
+//     bool getNotified_10min() const;
+//     bool getNotified_deadline() const;
 
     // Setters
     void setTitle(const std::string& title);
     void setDescription(const std::string& description);
     void setCompleted(bool completed);
     void setDeadline(std::chrono::system_clock::time_point deadline);
-    void setNotified_day(bool q);
-    void setNotified_hour(bool q);
-    void setNotified_10min(bool q);
-    void setNotified_deadline(bool q);
+//     void setNotified_day(bool q);
+//     void setNotified_hour(bool q);
+//     void setNotified_10min(bool q);
+//     void setNotified_deadline(bool q);
 
     // Functions
     bool isOverdue() const;

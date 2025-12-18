@@ -13,8 +13,8 @@ class ConsoleApp {
 
     void notificationLoop();
 
-    void printMenu();
-    void clearInput();
+    static void printMenu();
+    static void clearInput();
 
     void addTask();
     void listTasks();

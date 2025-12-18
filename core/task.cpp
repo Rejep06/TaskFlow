@@ -6,10 +6,10 @@ Task::Task(int id,
            const std::string& description,
            bool completed)
     : id_(id), title_(title), description_(description), completed_(completed), deadline_(std::chrono::system_clock::time_point::max()) {
-    bool notified_day_ = false;
-    bool notified_hour_ = false;
-    bool notified_10min_ = false;
-    bool notified_deadline_ = false;
+    notified_day_ = false;
+    notified_hour_ = false;
+    notified_10min_ = false;
+    notified_deadline_ = false;
 }
 
 Task::Task(int id,
@@ -18,10 +18,10 @@ Task::Task(int id,
            std::chrono::system_clock::time_point deadline,
            bool completed)
     : id_(id), title_(title), description_(description), completed_(completed), deadline_(deadline) {
-    bool notified_day_ = false;
-    bool notified_hour_ = false;
-    bool notified_10min_ = false;
-    bool notified_deadline_ = false;
+    notified_day_ = false;
+    notified_hour_ = false;
+    notified_10min_ = false;
+    notified_deadline_ = false;
 }
 
 // Getters
@@ -78,21 +78,21 @@ void Task::setDeadline(std::chrono::system_clock::time_point deadline) {
     deadline_ = deadline;
 }
 
-void Task::setNotified_day(bool q) {
-    notified_day_ = q;
-}
+// void Task::setNotified_day(bool q) {
+//     notified_day_ = q;
+// }
 
-void Task::setNotified_hour(bool q) {
-    notified_hour_ = q;
-}
+// void Task::setNotified_hour(bool q) {
+//     notified_hour_ = q;
+// }
 
-void Task::setNotified_10min(bool q) {
-    notified_10min_ = q;
-}
+// void Task::setNotified_10min(bool q) {
+//     notified_10min_ = q;
+// }
 
-void Task::setNotified_deadline(bool q) {
-    notified_deadline_ = q;
-}
+// void Task::setNotified_deadline(bool q) {
+//     notified_deadline_ = q;
+// }
 
 // Functions
 bool Task::isOverdue() const {

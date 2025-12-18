@@ -33,7 +33,7 @@ void ConsoleApp::notificationLoop() {
         auto res = cli.Get("/notifications");
         if (res && res->status == 200) {
             auto arr = json::parse(res->body);
-            for (auto& n : arr) {
+            for (const auto& n : arr) {
                 std::cout << "\n🔔 УВЕДОМЛЕНИЕ\n";
                 std::cout << "Задача: " << n["title"] << "\n";
                 std::cout << n["message"] << "\n";
@@ -243,7 +243,7 @@ void ConsoleApp::showOverdueTasks() {
     json tasks = json::parse(res->body);
 
     std::cout << "\n=== Просроченные задачи ===\n";
-    for (auto& t : tasks) {
+    for (const auto& t : tasks) {
         std::cout << "ID: " << t["id"] << " | "
                   << t["title"] << " | "
                   << t["deadline"] << "\n";

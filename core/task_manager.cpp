@@ -36,11 +36,11 @@ const std::vector<Task>& TaskManager::getAllTasks() const {
 }
 
 Task* TaskManager::findTaskById(int id) {
-    for (auto& task : tasks_) {
-        if (task.getId() == id) {
-            return &task;
-        }
-    }
+    auto it = std::find_if(tasks_.begin(), tasks_.end(),
+                           [id](const Task& t) { return t.getId() == id; });
+
+    if (it != tasks_.end())
+        return &(*it);
     return nullptr;
 }
 
