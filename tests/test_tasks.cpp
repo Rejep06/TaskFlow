@@ -54,12 +54,11 @@ TEST(TaskManagerTest, DeleteTask) {
     EXPECT_TRUE(deleted);
     EXPECT_TRUE(manager.getAllTasks().empty());
 
-    // Попытка удалить несуществующую задачу
     bool deleted2 = manager.deleteTask(100);
     EXPECT_FALSE(deleted2);
 }
 
-// Тестируем получение просроченных задач
+// Тестируем получение просроченных задач: в списке только невыполненные с прошедшим дедлайном
 TEST(TaskManagerTest, OverdueTasks) {
     TaskManager manager;
     auto past = std::chrono::system_clock::now() - std::chrono::hours(1);
@@ -68,13 +67,34 @@ TEST(TaskManagerTest, OverdueTasks) {
     // Создаем просроченную задачу и оставляем невыполненной
     const Task& t1 = manager.createTask("Overdue task", "desc", past);
 
-    // Проверяем, что пока выполнена = false → должна попасть в overdue
     auto overdue = manager.getOverdueTasks();
     ASSERT_EQ(overdue.size(), 1);
     EXPECT_EQ(overdue[0]->getTitle(), "Overdue task");
 
-    // Теперь пометим как выполненную
-    t1.setCompleted(true);
+    Task* overdueTask = manager.findTaskById(overdueId);
+    ASSERT_NE(overdueTask, nullptr);
+    overdueTask->setCompleted(true);
     overdue = manager.getOverdueTasks();
     EXPECT_TRUE(overdue.empty());
+}
+
+// Тестируем кандидатов на уведомления: только просроченные, невыполненные и с реальным дедлайном
+TEST(TaskManagerTest, OverdueTasksAreNotificationCandidates) {
+    TaskManager manager;
+    auto past = std::chrono::system_clock::now() - std::chrono::hours(3);
+    auto future = std::chrono::system_clock::now() + std::chrono::hours(3);
+
+    int overdueId = manager.createTask("Overdue", "desc", past).getId();
+    manager.createTask("Upcoming", "desc", future);
+    manager.createTask("No deadline", "desc", std::nullopt);
+
+    auto candidates = manager.getOverdueTasks();
+    ASSERT_EQ(candidates.size(), 1);
+    EXPECT_EQ(candidates[0]->getId(), overdueId);
+
+    Task* overdueTask = manager.findTaskById(overdueId);
+    ASSERT_NE(overdueTask, nullptr);
+    overdueTask->setCompleted(true);
+    candidates = manager.getOverdueTasks();
+    EXPECT_TRUE(candidates.empty());
 }
