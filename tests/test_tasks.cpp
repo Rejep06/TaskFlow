@@ -5,7 +5,7 @@
 // Тестируем создание задачи без дедлайна
 TEST(TaskManagerTest, CreateTaskWithoutDeadline) {
     TaskManager manager;
-    Task& task = manager.createTask("Task 1", "Description 1", std::nullopt);
+    const Task& task = manager.createTask("Task 1", "Description 1", std::nullopt);
 
     EXPECT_EQ(task.getId(), 1);
     EXPECT_EQ(task.getTitle(), "Task 1");
@@ -20,7 +20,7 @@ TEST(TaskManagerTest, CreateTaskWithoutDeadline) {
 TEST(TaskManagerTest, CreateTaskWithDeadline) {
     TaskManager manager;
     auto deadline = std::chrono::system_clock::now() + std::chrono::hours(24);
-    Task& task = manager.createTask("Task 2", "Description 2", deadline);
+    const Task& task = manager.createTask("Task 2", "Description 2", deadline);
 
     EXPECT_EQ(task.getId(), 1);
     EXPECT_EQ(task.getTitle(), "Task 2");
@@ -34,8 +34,8 @@ TEST(TaskManagerTest, CreateTaskWithDeadline) {
 // Тестируем поиск задачи по ID
 TEST(TaskManagerTest, FindTaskById) {
     TaskManager manager;
-    Task& task1 = manager.createTask("Task 1", "Desc 1", std::nullopt);
-    Task& task2 = manager.createTask("Task 2", "Desc 2", std::nullopt);
+    const Task& task1 = manager.createTask("Task 1", "Desc 1", std::nullopt);
+    const Task& task2 = manager.createTask("Task 2", "Desc 2", std::nullopt);
 
     Task* foundTask = manager.findTaskById(2);
     ASSERT_NE(foundTask, nullptr);
@@ -48,7 +48,7 @@ TEST(TaskManagerTest, FindTaskById) {
 // Тестируем удаление задачи
 TEST(TaskManagerTest, DeleteTask) {
     TaskManager manager;
-    Task& task = manager.createTask("Task 1", "Desc", std::nullopt);
+    const Task& task = manager.createTask("Task 1", "Desc", std::nullopt);
 
     bool deleted = manager.deleteTask(task.getId());
     EXPECT_TRUE(deleted);
@@ -66,7 +66,7 @@ TEST(TaskManagerTest, OverdueTasks) {
     auto future = std::chrono::system_clock::now() + std::chrono::hours(1);
 
     // Создаем просроченную задачу и оставляем невыполненной
-    Task& t1 = manager.createTask("Overdue task", "desc", past);
+    const Task& t1 = manager.createTask("Overdue task", "desc", past);
 
     // Проверяем, что пока выполнена = false → должна попасть в overdue
     auto overdue = manager.getOverdueTasks();

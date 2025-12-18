@@ -7,7 +7,7 @@
 
 class TaskRepository {
    public:
-    TaskRepository(std::shared_ptr<ParserTime> p);
+    explicit TaskRepository(std::shared_ptr<ParserTime> p);
     std::vector<Task> load();
     void save(const std::vector<Task>& tasks);
 
