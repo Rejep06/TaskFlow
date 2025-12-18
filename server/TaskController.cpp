@@ -30,7 +30,7 @@ void TaskController::registerRoutes(httplib::Server& server) {
 
     server.Get(R"(/tasks/(\d+))", [&](const httplib::Request& req, httplib::Response& res) {
         int id = std::stoi(req.matches[1]);
-        Task* task = manager->findTaskById(id);
+        const Task* task = manager->findTaskById(id);
 
         if (!task) {
             res.status = 404;
@@ -74,7 +74,7 @@ void TaskController::registerRoutes(httplib::Server& server) {
             }
         }
 
-        Task& task = manager->createTask(
+        const Task& task = manager->createTask(
             body["title"].get<std::string>(),
             body["description"].get<std::string>(),
             deadline);
@@ -152,7 +152,7 @@ void TaskController::registerRoutes(httplib::Server& server) {
         auto overdue = manager->getOverdueTasks();
         json j = json::array();
 
-        for (auto* t : overdue) {
+        for (const auto* t : overdue) {
             json item = {{"id", t->getId()},
                          {"title", t->getTitle()},
                          {"description", t->getDescription()},
@@ -162,5 +162,36 @@ void TaskController::registerRoutes(httplib::Server& server) {
         }
 
         res.set_content(j.dump(), "application/json");
+    });
+
+    server.Get("/notifications", [&](const httplib::Request&, httplib::Response& res) {
+        json result = json::array();
+
+        for (Task& task : manager->getAllTasks()) {
+            auto type = task.checkNotification();
+            if (!type.has_value()) continue;
+
+            std::string msg;
+            switch (*type) {
+                case NotifyType::DAY:
+                    msg = "Остался 1 день";
+                    break;
+                case NotifyType::HOUR:
+                    msg = "Остался 1 час";
+                    break;
+                case NotifyType::MIN10:
+                    msg = "Осталось 10 минут";
+                    break;
+                case NotifyType::DEADLINE:
+                    msg = "Дедлайн наступил!";
+                    break;
+            }
+
+            result.push_back({{"task_id", task.getId()},
+                              {"title", task.getTitle()},
+                              {"message", msg}});
+        }
+
+        res.set_content(result.dump(), "application/json");
     });
 }
